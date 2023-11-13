@@ -1,0 +1,8 @@
+# Exclude g++ binary file
+*.out
+
+# Exclude cmake build directory
+cmake-build-debug/
+
+# Exclude Clion files
+.idea/
