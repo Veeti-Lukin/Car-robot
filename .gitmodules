@@ -1,0 +1,6 @@
+[submodule "libs/BCM2711_GPIO_DRIVER"]
+	path = libs/BCM2711_GPIO_DRIVER
+	url = git@github.com:Veeti-Lukin/BCM2711_GPIO_DRIVER.git
+[submodule "libs/basic-http-server"]
+	path = libs/basic-http-server
+	url = git@github.com:Veeti-Lukin/basic-http-server.git
