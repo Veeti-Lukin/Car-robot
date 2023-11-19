@@ -29,7 +29,7 @@ add_executable(${PROJECT_NAME}
             )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
-                    basic_http_server
-                    BCM2711_GPIO_DRIVER)
+                    http_server
+                    BCM2711_GPIO_Driver)
 
 target_include_directories(${PROJECT_NAME} PRIVATE inc libs)
