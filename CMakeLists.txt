@@ -17,20 +17,21 @@ add_subdirectory(
 #)
 
 add_executable(${PROJECT_NAME}
-            inc/CarController.h
-            src/CarController.cpp
+            #inc/CarController.h
+            #src/CarController.cpp
 
-            inc/MotorController.h
-            src/MotorController.cpp
+            #inc/MotorController.h
+            #src/MotorController.cpp
 
+            inc/robot_types.h
             #inc/PiezoController.h
             #src/PiezoController.cpp
         main.cpp
-            )
+)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
                     http_server
-                    BCM2711_GPIO_Driver
+                    #BCM2711_GPIO_Driver
 )
 
 target_include_directories(${PROJECT_NAME} PRIVATE inc libs)
