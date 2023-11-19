@@ -1,0 +1,511 @@
+  <!doctype html>
+
+<html>
+<head>
+    <title>RC car controller</title>
+    <meta charset="UTF-8">
+</head>
+<style>
+    *
+    {
+        box-sizing: border-box;
+    }
+    body
+    {
+        margin: 0px;
+        padding: 0px;
+        font-family: monospace;
+    }
+    .row
+    {
+        display: inline-flex;
+        clear: both;
+    }
+    .columnLateral
+    {
+      float: left;
+      width: 15%;
+      min-width: 300px;
+    }
+    .columnCetral
+    {
+      float: left;
+      width: 70%;
+      min-width: 300px;
+    } 
+
+    #STOP-Critical {
+        background-color: #f44336; /* Red */
+        border: none;
+        color: white;
+        padding: 15px 32px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 16px;
+    }
+    #STOP-Critical:hover {
+        background-color: #da190b;
+    }
+    #STOP-Critical:active {
+        background-color: #da190b;
+        box-shadow: 0 5px #666;
+        transform: translateY(4px);
+    }
+
+    #start {
+        background-color: #29ec0f; /* Green */
+        border: none;
+        color: white;
+        padding: 15px 32px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 16px;
+    }
+    #start:hover {
+        background-color: #1e7209;
+    }
+    #start:active {
+        background-color: #1e7209;
+        box-shadow: 0 5px #666;
+        transform: translateY(4px);
+    }
+
+
+     /* Style the tab */
+    .tab {
+      overflow: hidden;
+      border: 1px solid #ccc;
+      background-color: #f1f1f1;
+    }
+
+    /* Style the buttons that are used to open the tab content */
+    .tab button {
+      background-color: inherit;
+      float: left;
+      border: none;
+      outline: none;
+      cursor: pointer;
+      padding: 14px 16px;
+      transition: 0.3s;
+    }
+
+    /* Change background color of buttons on hover */
+    .tab button:hover {
+      background-color: #ddd;
+    }
+
+    /* Create an active/current tablink class */
+    .tab button.active {
+      background-color: #ccc;
+    }
+    
+    
+    /* Style the tab content */
+    .tabcontent {
+      display: none;
+      padding: 6px 12px;
+      border: 1px solid #ccc;
+      border-top: none;
+    } 
+
+    /* Fade in animation for tabs*/
+    .tabcontent {
+      animation: fadeEffect 1s; /* Fading effect takes 1 second */
+    }
+
+    /* Go from zero to full opacity */
+    @keyframes fadeEffect {
+      from {opacity: 0;}
+      to {opacity: 1;}
+    }
+
+    
+    #one-axis-joystick-wrapper {
+        display: flex;
+        justify-content: space-between;
+        height: 300px; /* Adjust as needed */
+        align-items: center;; /* Adjust as needed */
+    }
+
+    #one-axis-joystick-container-x {
+        width: 300px;
+        height: 50px;
+        border: 1px solid #000;
+        position: relative;
+        overflow: hidden;
+    }
+
+    #one-axis-joystick-handle-x {
+        width: 50px;
+        height: 50px;
+        background: #000;
+        position: absolute;
+        left: 0;
+        top: 50%; /* Center vertically */
+        transform: translateY(-50%); /* Center vertically */
+        cursor: pointer;
+    }
+
+    #one-axis-joystick-container-y {
+        width: 50px;
+        height: 300px;
+        border: 1px solid #000;
+        position: relative;
+        overflow: hidden;
+    }
+
+    #one-axis-joystick-handle-y {
+        width: 50px;
+        height: 50px;
+        background: #000;
+        position: absolute;
+        top: 0;
+        left: 50%; /* Center horizontally */
+        transform: translateX(-50%); /* Center horizontally */
+        cursor: pointer;
+    }
+
+    #log {
+        font-family: monospace;
+        background-color: #f0f0f0;
+        border: 1px solid #000;
+        padding: 10px;
+        height: 200px;
+        overflow-y: auto;
+        white-space: pre-wrap;
+    }
+</style>
+
+<body>
+    <h1>RC Car Controller 2000</h1>
+
+    <!-- The main controls for the robot -->
+    <button id="STOP-Critical">STOP</button>
+    <button id="start">START</button>
+    <br><br>
+
+    <!-- Different controlling layouts in tabs -->
+    <!-- Tab links -->
+    <div class="tab">
+        <button class="tablinks" onclick="openTab(event, 'button')" id="defaultOpen">Basic Buttons</button>
+        <button class="tablinks" onclick="openTab(event, 'joystick')">one-axis-joystick</button>
+        <button class="tablinks" onclick="openTab(event, 'doublejoystick')">Double one-axis-joystick</button>
+    </div>
+
+    <!-- Tab content -->
+    <div id="button" class="tabcontent">
+        <h3>Basic button controls</h3>
+        <button id="forward", onclick="sendCommand(CommandActions.DRIVE_FORWARD)">Forward</button>
+        <button id="backward", onclick="sendCommand(CommandActions.DRIVE_BACKWARD)">Backward</button>
+        <button id="left", onclick="sendCommand(CommandActions.TURN_LEFT)">Turn Left</button>
+        <button id="right", onclick="sendCommand(CommandActions.TURN_RIGHT)">Turn Right</button>
+        <button id="stop">Stop</button>
+     </div>
+  
+    <div id="joystick" class="tabcontent">
+        <h3>one-axis-joystick controls</h3>
+    </div>
+  
+    <div id="doublejoystick" class="tabcontent">
+        <h3>Double single axis one-axis-joystick controls</h3>
+        <div id="one-axis-joystick-wrapper">
+            <div id="one-axis-joystick-container-x">
+                <div id="one-axis-joystick-handle-x"></div>
+            </div>
+            <div id="one-axis-joystick-container-y">
+                <div id="one-axis-joystick-handle-y"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="Sound">
+        <h3>Sound</h3>
+        <button id="" class="sounplay-button"> Play R2D2 Sound</button>
+    </div>
+
+    <!-- Log for the debug prints that the robot side code makes-->
+    <div id="log-container">
+        <h2>Log</h2>
+        <button id="clear-log" onclick="clearLog()">Clear log</button>
+        <button id="restar-log-fetching" hidden="hidden" onclick="startFetchingLogs()">Restart log fetching</button>
+        <div id="log">
+            <p id="logcontent">Log messages will appear here</p>
+        </div>
+    </div>
+    
+    <!-- Tab controlling scripts -->
+    <script type="text/javascript">
+        function openTab(evt, tab_id) {
+            // Declare all variables
+            var i;
+            var tabcontent;
+            var tablinks;
+
+            // Get all elements with class="tabcontent" and hide them
+            tabcontent = document.getElementsByClassName("tabcontent");
+            for (i = 0; i < tabcontent.length; i++) {
+              tabcontent[i].style.display = "none";
+            }
+
+            // Get all elements with class="tablinks" and remove the class "active"
+            tablinks = document.getElementsByClassName("tablinks");
+            for (i = 0; i < tablinks.length; i++) {
+              tablinks[i].className = tablinks[i].className.replace(" active", "");
+            }
+
+            // Show the current tab, and add an "active" class to the button that opened the tab
+            document.getElementById(tab_id).style.display = "block";
+            evt.currentTarget.className += " active";
+        }
+        
+        // open the default tab
+        document.getElementById("defaultOpen").click();
+    </script>
+
+    <!-- one-axis-joystick controlling scripts -->
+    <script type="text/javascript">
+        var joystickContainer = document.getElementById('one-axis-joystick-container-x');
+        var joystickHandle = document.getElementById('one-axis-joystick-handle-x');
+
+        joystickHandle.addEventListener('mousedown', startDrag);
+        joystickContainer.addEventListener('mouseup', stopDrag);
+        joystickContainer.addEventListener('mousemove', drag);
+
+        var dragStatus = false;
+        var startX, startLeft;
+
+        function startDrag(e) {
+            dragStatus = true;
+            startX = e.clientX;
+            startLeft = joystickHandle.offsetLeft;
+        }
+
+        function stopDrag() {
+            dragStatus = false;
+            // Calculate the center position
+            var centerPosition = (joystickContainer.offsetWidth - joystickHandle.offsetWidth) / 2;
+            // Reset the handle position to the center
+            joystickHandle.style.left = centerPosition + 'px';
+        }
+
+        function drag(e) {
+            if (dragStatus) {
+                var dx = e.clientX - startX;
+                var newLeft = startLeft + dx;
+            
+                // Keep one-axis-joystick handle within container
+                newLeft = Math.max(0, newLeft);
+                newLeft = Math.min(newLeft, joystickContainer.offsetWidth - joystickHandle.offsetWidth);
+            
+                joystickHandle.style.left = newLeft + 'px';
+            }
+        }
+
+        // Initialize the one-axis-joystick handle to the center
+        stopDrag();
+
+        var joystickContainerY = document.getElementById('one-axis-joystick-container-y');
+        var joystickHandleY = document.getElementById('one-axis-joystick-handle-y');
+
+        joystickHandleY.addEventListener('mousedown', startDragY);
+        joystickContainerY.addEventListener('mouseup', stopDragY);
+        joystickContainerY.addEventListener('mousemove', dragY);
+
+        var dragStatusY = false;
+        var startY, startTop;
+
+        function startDragY(e) {
+            dragStatusY = true;
+            startY = e.clientY;
+            startTop = joystickHandleY.offsetTop;
+        }
+
+        function stopDragY() {
+            dragStatusY = false;
+            // Calculate the center position
+            var centerPositionY = (joystickContainerY.offsetHeight - joystickHandleY.offsetHeight) / 2;
+            // Reset the handle position to the center
+            joystickHandleY.style.top = centerPositionY + 'px';
+        }
+
+        function dragY(e) {
+            if (dragStatusY) {
+                var dy = e.clientY - startY;
+                var newTop = startTop + dy;
+
+                // Keep one-axis-joystick handle within container
+                newTop = Math.max(0, newTop);
+                newTop = Math.min(newTop, joystickContainerY.offsetHeight - joystickHandleY.offsetHeight);
+
+                joystickHandleY.style.top = newTop + 'px';
+            }
+        }
+
+        // Initialize the one-axis-joystick handle to the center
+        stopDragY();
+    </script>
+
+    <!-- Log scripts -->
+    <script>
+        function clearLog() {
+            var log = document.getElementById('logcontent');
+            log.textContent = '';
+        }
+
+        function startFetchingLogs() {
+            var restart_log_fetching_button = document.getElementById('restar-log-fetching');
+            restart_log_fetching_button.setAttribute('hidden', 'hidden');
+
+            var failed_log_fetches = 0;
+            var interval = setInterval(() => {
+                clearLog();
+
+                fetch('/path/to/log') // Replace with the actual path to the log
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok! (Route might not be handled by the server or the server is down)');
+                        }
+                        return response.text()
+                    })
+                    .then(data => {
+                        var log = document.getElementById('logcontent');
+                        log.textContent = data;
+                        log.scrollTop = log.scrollHeight; // Scroll to bottom
+
+                        // Reset the failed log fetches counter
+                        failed_log_fetches = 0;
+                    })
+                    .catch(error => {
+                        console.error('Error:', error)
+                        var log = document.getElementById('logcontent');
+                        log.textContent = 'Error fetching log: ' + error + '\n\n' + log.textContent;
+                        log.scrollTop = log.scrollHeight; // Scroll to bottom
+                        failed_log_fetches++;
+
+                        // Stop the interval after 20 failed fetches
+                        if (failed_log_fetches >= 20) {
+                            clearInterval(interval); 
+                            var restart_log_fetching_button = document.getElementById('restar-log-fetching');
+                            restart_log_fetching_button.removeAttribute('hidden');
+                        }
+                    });
+            }, 50);
+        }
+
+        // Start fetching logs when the page is loaded
+        //startFetchingLogs();
+    </script>
+
+    <!-- Robot command scripts -->
+    <script type="text/javascript">
+        const rootCommandingRoute = 'robot-api/command';
+        
+        const CommandActions = {
+            DRIVE_FORWARD: 'drive_forward',
+            DRIVE_BACKWARD: 'drive_backward',
+            TURN_LEFT: 'turn_left',
+            TURN_RIGHT: 'turn_right',
+
+            DRIVE_RELATIVE_ANGLE: 'drive_relative_angle',
+
+            STOP: 'stop',
+            START: 'start',
+
+            SET_SPEED: 'set_speed',
+        };
+        
+        // Function to send a POST request to the server
+        function sendPostRequest(command_action, command_args) {
+           fetch(rootCommandingRoute, {
+               method: 'POST',
+               headers: {
+                   'Content-Type': 'application/json',
+               },
+               body: JSON.stringify({
+                    command_action: command_action,
+                    command_args: command_args || {},
+               }),
+           })
+           .then(response => {
+               if (response.ok) {
+                   console.log(`Successfully sent POST request for action: ${command_action}`);
+               } else {
+                   console.error(`Failed to send POST request for action: ${command_action}`);
+               }
+           })
+           .catch(error => {
+               console.error(`Error sending POST request for action: ${command_action}`, error);
+           });
+       }
+
+        // Function to send a command to the robot
+        function sendCommand(command_action, ...command_args) {
+            switch (command_action) {
+                case CommandActions.DRIVE_FORWARD:
+                    if (command_args.length != 0) {
+                        console.error('Invalid number of arguments for command: ' + command);
+                        return;
+                    }
+                    sendPostRequest(CommandActions.DRIVE_FORWARD);
+                    break;
+                case CommandActions.DRIVE_BACKWARD:
+                    if (command_args.length != 0) {
+                        console.error('Invalid number of arguments for command: ' + command);
+                        return;
+                    }
+                    sendPostRequest(CommandActions.DRIVE_BACKWARD);
+                    break;
+                case CommandActions.TURN_LEFT:
+                    if (command_args.length != 0) {
+                        console.error('Invalid number of arguments for command: ' + command);
+                        return;
+                    }
+                    sendPostRequest(CommandActions.TURN_LEFT);
+                    break;
+                case CommandActions.TURN_RIGHT:
+                    if (command_args.length != 0) {
+                        console.error('Invalid number of arguments for command: ' + command);
+                        return;
+                    }
+                    sendPostRequest(CommandActions.TURN_RIGHT);
+                    break;
+
+                case CommandActions.DRIVE_RELATIVE_ANGLE:
+                    if (command_args.length != 2) {
+                        console.error('Invalid number of arguments for command: ' + command);
+                        return;
+                    }
+                    sendPostRequest(CommandActions.DRIVE_RELATIVE_ANGLE, { angle: command_args[0], speed: command_args[1] });
+                    break;                    
+
+                case CommandActions.STOP:
+                    if (command_args.length != 0) {
+                        console.error('Invalid number of arguments for command: ' + command);
+                        return;
+                    }
+                    sendPostRequest(CommandActions.STOP);
+                    break;
+                case CommandActions.START:
+                    if (command_args.length != 0) {
+                        console.error('Invalid number of arguments for command: ' + command);
+                        return;
+                    }
+                    sendPostRequest(CommandActions.START);
+                    break;
+                
+                case CommandActions.SET_SPEED:
+                    if (command_args.length != 1) {
+                        console.error('Invalid number of arguments for command: ' + command);
+                        return;
+                    }
+                    sendPostRequest(CommandActions.SET_SPEED, { speed: command_args[0] });
+                    break;
+                default:
+                    console.error('Invalid command: ' + command);
+            }
+        }
+    </script>
+</body>
+</html>

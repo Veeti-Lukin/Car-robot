@@ -30,6 +30,9 @@ add_executable(${PROJECT_NAME}
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
                     http_server
-                    BCM2711_GPIO_Driver)
+                    BCM2711_GPIO_Driver
+)
 
 target_include_directories(${PROJECT_NAME} PRIVATE inc libs)
+
+configure_file(client_frontend/index.html ${CMAKE_CURRENT_BINARY_DIR}/client_frontend/index.html COPYONLY)
