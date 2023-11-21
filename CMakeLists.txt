@@ -6,6 +6,8 @@ project(Car-robot
         DESCRIPTION "Raspberry pi 4b Car robot"
         LANGUAGES CXX)
 
+include(FetchContent)
+
 
 add_subdirectory(
         libs
@@ -17,21 +19,29 @@ add_subdirectory(
 #)
 
 add_executable(${PROJECT_NAME}
-            #inc/CarController.h
-            #src/CarController.cpp
+            inc/CarController.h
+            src/CarController.cpp
 
-            #inc/MotorController.h
-            #src/MotorController.cpp
+            inc/MotorController.h
+            src/MotorController.cpp
 
-            inc/robot_types.h
-            #inc/PiezoController.h
+        inc/commands.h
+        src/commands.cpp
+        #inc/PiezoController.h
             #src/PiezoController.cpp
         main.cpp
 )
 
+FetchContent_Declare(json
+        DOWNLOAD_EXTRACT_TIMESTAMP TRUE
+        URL https://github.com/nlohmann/json/releases/download/v3.11.2/json.tar.xz
+)
+FetchContent_MakeAvailable(json)
+
 target_link_libraries(${PROJECT_NAME} PRIVATE
                     http_server
-                    #BCM2711_GPIO_Driver
+                    BCM2711_GPIO_Driver
+        nlohmann_json::nlohmann_json
 )
 
 target_include_directories(${PROJECT_NAME} PRIVATE inc libs)

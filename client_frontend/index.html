@@ -197,10 +197,10 @@
     <!-- Tab content -->
     <div id="button" class="tabcontent">
         <h3>Basic button controls</h3>
-        <button id="forward", onclick="sendCommand(CommandActions.DRIVE_FORWARD)">Forward</button>
-        <button id="backward", onclick="sendCommand(CommandActions.DRIVE_BACKWARD)">Backward</button>
-        <button id="left", onclick="sendCommand(CommandActions.TURN_LEFT)">Turn Left</button>
-        <button id="right", onclick="sendCommand(CommandActions.TURN_RIGHT)">Turn Right</button>
+        <button id="forward", onclick="sendMovementCommand(MovementCommandActions.DRIVE_FORWARD)">Forward</button>
+        <button id="backward", onclick="sendMovementCommand(MovementCommandActions.DRIVE_BACKWARD)">Backward</button>
+        <button id="left", onclick="sendMovementCommand(MovementCommandActions.TURN_LEFT)">Turn Left</button>
+        <button id="right", onclick="sendMovementCommand(MovementCommandActions.TURN_RIGHT)">Turn Right</button>
         <button id="stop">Stop</button>
      </div>
   
@@ -400,32 +400,30 @@
 
     <!-- Robot command scripts -->
     <script type="text/javascript">
-        const rootCommandingRoute = 'robot-api/command';
+        const ROOT_COMMANDING_ROUTE = 'robot-api/';
+        const MOVEMENT_COMMANDING_ROUTE = ROOT_COMMANDING_ROUTE + 'movement-command';
         
-        const CommandActions = {
-            DRIVE_FORWARD: 'drive_forward',
-            DRIVE_BACKWARD: 'drive_backward',
-            TURN_LEFT: 'turn_left',
-            TURN_RIGHT: 'turn_right',
-
-            DRIVE_RELATIVE_ANGLE: 'drive_relative_angle',
-
-            STOP: 'stop',
-            START: 'start',
-
-            SET_SPEED: 'set_speed',
+        const MovementCommandActions = {
+            DRIVE_FORWARD: 0,
+            DRIVE_BACKWARD: 1,
+            TURN_LEFT: 2,
+            TURN_RIGHT: 3,
+            DRIVE_RELATIVE_ANGLE: 4,
+            STOP: 5,
+            START: 6,
+            SET_SPEED: 7,
         };
         
         // Function to send a POST request to the server
         function sendPostRequest(command_action, command_args) {
-           fetch(rootCommandingRoute, {
+           fetch(MOVEMENT_COMMANDING_ROUTE, {
                method: 'POST',
                headers: {
                    'Content-Type': 'application/json',
                },
                body: JSON.stringify({
                     command_action: command_action,
-                    command_args: command_args || {},
+                    command_args: command_args,
                }),
            })
            .then(response => {
@@ -441,66 +439,66 @@
        }
 
         // Function to send a command to the robot
-        function sendCommand(command_action, ...command_args) {
+        function sendMovementCommand(command_action, ...command_args) {
             switch (command_action) {
-                case CommandActions.DRIVE_FORWARD:
+                case MovementCommandActions.DRIVE_FORWARD:
                     if (command_args.length != 0) {
-                        console.error('Invalid number of arguments for command: ' + command);
+                        console.error('Invalid number of arguments for command: ' + command_action);
                         return;
                     }
-                    sendPostRequest(CommandActions.DRIVE_FORWARD);
+                    sendPostRequest(MovementCommandActions.DRIVE_FORWARD);
                     break;
-                case CommandActions.DRIVE_BACKWARD:
+                case MovementCommandActions.DRIVE_BACKWARD:
                     if (command_args.length != 0) {
-                        console.error('Invalid number of arguments for command: ' + command);
+                        console.error('Invalid number of arguments for command: ' + command_action);
                         return;
                     }
-                    sendPostRequest(CommandActions.DRIVE_BACKWARD);
+                    sendPostRequest(MovementCommandActions.DRIVE_BACKWARD);
                     break;
-                case CommandActions.TURN_LEFT:
+                case MovementCommandActions.TURN_LEFT:
                     if (command_args.length != 0) {
-                        console.error('Invalid number of arguments for command: ' + command);
+                        console.error('Invalid number of arguments for command: ' + command_action);
                         return;
                     }
-                    sendPostRequest(CommandActions.TURN_LEFT);
+                    sendPostRequest(MovementCommandActions.TURN_LEFT);
                     break;
-                case CommandActions.TURN_RIGHT:
+                case MovementCommandActions.TURN_RIGHT:
                     if (command_args.length != 0) {
-                        console.error('Invalid number of arguments for command: ' + command);
+                        console.error('Invalid number of arguments for command: ' + command_action);
                         return;
                     }
-                    sendPostRequest(CommandActions.TURN_RIGHT);
+                    sendPostRequest(MovementCommandActions.TURN_RIGHT);
                     break;
 
-                case CommandActions.DRIVE_RELATIVE_ANGLE:
+                case MovementCommandActions.DRIVE_RELATIVE_ANGLE:
                     if (command_args.length != 2) {
-                        console.error('Invalid number of arguments for command: ' + command);
+                        console.error('Invalid number of arguments for command: ' + command_action);
                         return;
                     }
-                    sendPostRequest(CommandActions.DRIVE_RELATIVE_ANGLE, { angle: command_args[0], speed: command_args[1] });
+                    sendPostRequest(MovementCommandActions.DRIVE_RELATIVE_ANGLE, { angle: command_args[0], speed: command_args[1] });
                     break;                    
 
-                case CommandActions.STOP:
+                case MovementCommandActions.STOP:
                     if (command_args.length != 0) {
-                        console.error('Invalid number of arguments for command: ' + command);
+                        console.error('Invalid number of arguments for command: ' + command_action);
                         return;
                     }
-                    sendPostRequest(CommandActions.STOP);
+                    sendPostRequest(MovementCommandActions.STOP);
                     break;
-                case CommandActions.START:
+                case MovementCommandActions.START:
                     if (command_args.length != 0) {
-                        console.error('Invalid number of arguments for command: ' + command);
+                        console.error('Invalid number of arguments for command: ' + command_action);
                         return;
                     }
-                    sendPostRequest(CommandActions.START);
+                    sendPostRequest(MovementCommandActions.START);
                     break;
                 
-                case CommandActions.SET_SPEED:
+                case MovementCommandActions.SET_SPEED:
                     if (command_args.length != 1) {
-                        console.error('Invalid number of arguments for command: ' + command);
+                        console.error('Invalid number of arguments for command: ' + command_action);
                         return;
                     }
-                    sendPostRequest(CommandActions.SET_SPEED, { speed: command_args[0] });
+                    sendPostRequest(MovementCommandActions.SET_SPEED, { speed: command_args[0] });
                     break;
                 default:
                     console.error('Invalid command: ' + command);
