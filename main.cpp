@@ -18,12 +18,14 @@ std::string readIndexHtml() {
     return buffer.str();
 }
 
-http::HttpResponse createFailedCommandResponse() {
-    return {http::types::HttpProtocolVersion::HTTP1_1, http::types::ResponseStatusCode::BadRequest};
+http::HttpResponse createFailedCommandResponse(const std::string& log_message) {
+    return {http::types::HttpProtocolVersion::HTTP1_1, http::types::ResponseStatusCode::BadRequest,
+            http::types::ContentBodyFormat::application_json, createJsonLogMessage(log_message)};
 }
 
-http::HttpResponse createExecutedCommandResponse() {
-    return {http::types::HttpProtocolVersion::HTTP1_1, http::types::ResponseStatusCode::OK};
+http::HttpResponse createExecutedCommandResponse(const std::string& log_message) {
+    return {http::types::HttpProtocolVersion::HTTP1_1, http::types::ResponseStatusCode::OK,
+            http::types::ContentBodyFormat::application_json, createJsonLogMessage(log_message)};
 }
 
 
@@ -77,13 +79,13 @@ int main() {
     server.bindHandler(http::types::RequestMethod::POST, ROBOT_MOVEMENT_COMMAND_ROUTE, [&](http::HttpRequest request, http::HttpResponse response) {
         Command command;
         if(!parseJsonCommand(request.getContentBody(), command)) {
-            return createFailedCommandResponse();
+            return createFailedCommandResponse("Command execution failed");
         }
 
         if (!executeMovementCommand(command, car_controller)) {
-            return createFailedCommandResponse();
+            return createFailedCommandResponse("Command execution failed");
         }
-        return createExecutedCommandResponse();
+        return createExecutedCommandResponse("Executed command ");
     });
 
     server.startServing();

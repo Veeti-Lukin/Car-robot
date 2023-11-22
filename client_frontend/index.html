@@ -229,7 +229,7 @@
     <div id="log-container">
         <h2>Log</h2>
         <button id="clear-log" onclick="clearLog()">Clear log</button>
-        <button id="restar-log-fetching" hidden="hidden" onclick="startFetchingLogs()">Restart log fetching</button>
+        <button id="toggle-frontend-logs" onclick="toggleFrontendLogs()">Toggle fronend logs on</button>
         <div id="log">
             <p id="logcontent">Log messages will appear here</p>
         </div>
@@ -349,53 +349,42 @@
 
     <!-- Log scripts -->
     <script>
+        const log = document.getElementById('logcontent');
+        var first_log_event = true;
+        var show_frontend_logs = false;
+
         function clearLog() {
-            var log = document.getElementById('logcontent');
             log.textContent = '';
         }
 
-        function startFetchingLogs() {
-            var restart_log_fetching_button = document.getElementById('restar-log-fetching');
-            restart_log_fetching_button.setAttribute('hidden', 'hidden');
-
-            var failed_log_fetches = 0;
-            var interval = setInterval(() => {
+        function addLogMessage(message) {
+            if(first_log_event) {
                 clearLog();
+                first_log_event = false;
+            }
 
-                fetch('/path/to/log') // Replace with the actual path to the log
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error('Network response was not ok! (Route might not be handled by the server or the server is down)');
-                        }
-                        return response.text()
-                    })
-                    .then(data => {
-                        var log = document.getElementById('logcontent');
-                        log.textContent = data;
-                        log.scrollTop = log.scrollHeight; // Scroll to bottom
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            const timestamp = `${hours}:${minutes}:${seconds}`;
 
-                        // Reset the failed log fetches counter
-                        failed_log_fetches = 0;
-                    })
-                    .catch(error => {
-                        console.error('Error:', error)
-                        var log = document.getElementById('logcontent');
-                        log.textContent = 'Error fetching log: ' + error + '\n\n' + log.textContent;
-                        log.scrollTop = log.scrollHeight; // Scroll to bottom
-                        failed_log_fetches++;
+            log.textContent += `[${timestamp}] ${message}\n`;
 
-                        // Stop the interval after 20 failed fetches
-                        if (failed_log_fetches >= 20) {
-                            clearInterval(interval); 
-                            var restart_log_fetching_button = document.getElementById('restar-log-fetching');
-                            restart_log_fetching_button.removeAttribute('hidden');
-                        }
-                    });
-            }, 50);
+            // Scroll to the end
+            log.scrollTop = log.scrollHeight;
+        }
+        function addFronetndLogMessage(message) {
+            if(show_frontend_logs) {
+                addLogMessage("FRONTEND: " + message);
+            }
         }
 
-        // Start fetching logs when the page is loaded
-        //startFetchingLogs();
+        function toggleFrontendLogs() {
+            show_frontend_logs = !show_frontend_logs;
+            document.getElementById("toggle-frontend-logs").innerHTML = "Toggle fronend logs " + (show_frontend_logs ? "off" : "on");
+        }
+
     </script>
 
     <!-- Robot command scripts -->
@@ -416,27 +405,44 @@
         
         // Function to send a POST request to the server
         function sendPostRequest(command_action, command_args) {
-           fetch(MOVEMENT_COMMANDING_ROUTE, {
-               method: 'POST',
-               headers: {
+            var command_body = JSON.stringify({
+                        command_action: command_action,
+                        command_args: command_args,
+                        });
+
+            var response_status = 0;
+            var response_text = "";
+
+            fetch(MOVEMENT_COMMANDING_ROUTE, {
+                method: 'POST',
+                headers: {
                    'Content-Type': 'application/json',
-               },
-               body: JSON.stringify({
-                    command_action: command_action,
-                    command_args: command_args,
-               }),
-           })
-           .then(response => {
-               if (response.ok) {
-                   console.log(`Successfully sent POST request for action: ${command_action}`);
-               } else {
-                   console.error(`Failed to send POST request for action: ${command_action}`);
-               }
-           })
-           .catch(error => {
-               console.error(`Error sending POST request for action: ${command_action}`, error);
-           });
-       }
+                },
+                body: command_body,
+            })
+            .then(response => {
+                response_status = response.status;
+                response_text = response.status + ' ' + response.statusText;
+                return response.json();
+            })
+            .then(data => {
+                response_text =  response_text + ' '+ JSON.stringify(data);
+                addFronetndLogMessage(`Received response for command: ${command_body}, response: ` + response_text);
+            
+                if (response_status = 200 || response_status == 400) {
+                    addLogMessage(data['log'] || 'response had no log message');
+                } 
+                else {
+                    addFrontendLogMessage('Unexpected response' + response_text);
+                }
+            })
+            .catch(error => {
+                addFronetndLogMessage(`Error occured while sending the command: ${command_body}`);
+                console.error(`Error sending POST request for action: ${command_body}`, error);
+            });
+
+            addFronetndLogMessage(`Sent command: ${command_body}`);
+        }
 
         // Function to send a command to the robot
         function sendMovementCommand(command_action, ...command_args) {

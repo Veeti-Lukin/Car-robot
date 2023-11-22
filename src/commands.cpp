@@ -5,6 +5,7 @@
 
 const std::string COMMAND_ACTION_KEY = "command_action";
 const std::string COMMAND_ARGS_KEY = "command_args";
+const std::string LOG_KEY = "log";
 
 bool parseJsonCommand(const std::string& json_command, Command& command) {
     try {
@@ -20,4 +21,8 @@ bool parseJsonCommand(const std::string& json_command, Command& command) {
 
 
     return true;
+}
+
+std::string createJsonLogMessage(const std::string& message) {
+    return R"({ "log" : ")" + message + R"(" })";
 }

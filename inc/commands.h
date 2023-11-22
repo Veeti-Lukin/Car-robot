@@ -37,4 +37,6 @@ bool getJsonFieldAsType(const std::string& key, const nlohmann::json& json, T& t
 
 bool parseJsonCommand(const std::string& json_command, Command& command);
 
+std::string createJsonLogMessage(const std::string& message);
+
 #endif //CAR_ROBOT_COMMANDS_H
