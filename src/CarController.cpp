@@ -2,6 +2,7 @@
 
 #include "math.h"
 #include "BCM2711_GPIO_DRIVER/inc/BCM2711_GPIO_Driver/gpio_types.h"
+#include <iostream>
 
 
 CarController::CarController(PwmPin left_motor_speed_pin, uint8_t left_motor_dir1_pin,
@@ -20,6 +21,7 @@ void CarController::driveForward()
     left_motor.setDirection(forward);
     right_motor.setSpeed(speed_);
     left_motor.setSpeed(speed_);
+    std::cout  << speed_ << std::endl;
 }
 
 void CarController::driveBackwards()

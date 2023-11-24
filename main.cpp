@@ -47,11 +47,17 @@ bool executeMovementCommand(const Command& command, CarController car_controller
         case MoveCommandAction::DRIVE_RELATIVE_ANGLE:
             break;
         case MoveCommandAction::STOP_MOTORS:
-            break;
+            car_controller.stop();
+            return true;
         case MoveCommandAction::START_MOTORS:
             break;
-        case MoveCommandAction::SET_SPEED:
-            break;
+        case MoveCommandAction::SET_SPEED:{
+            uint8_t speed = 0;
+            if(!getJsonFieldAsType<uint8_t>("speed", command.command_args, speed))
+                return false;
+            car_controller.setSpeed(speed);
+            return true;
+        }
         case MoveCommandAction::UNKNOWN:
         default:
             break;

@@ -201,7 +201,9 @@
         <button id="backward", onclick="sendMovementCommand(MovementCommandActions.DRIVE_BACKWARD)">Backward</button>
         <button id="left", onclick="sendMovementCommand(MovementCommandActions.TURN_LEFT)">Turn Left</button>
         <button id="right", onclick="sendMovementCommand(MovementCommandActions.TURN_RIGHT)">Turn Right</button>
-        <button id="stop">Stop</button>
+        <button id="stop", onclick="sendMovementCommand(MovementCommandActions.STOP)">Stop</button>
+        <input type="number" id="speed-box" step="10">
+        <button id="set-speed", onclick="sendMovementCommand(MovementCommandActions.SET_SPEED, parseInt(document.getElementById('speed-box').value) )">Set speed</button>
      </div>
   
     <div id="joystick" class="tabcontent">
