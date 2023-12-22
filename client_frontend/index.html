@@ -122,49 +122,32 @@
     }
 
     
-    #one-axis-joystick-wrapper {
-        display: flex;
-        justify-content: space-between;
-        height: 300px; /* Adjust as needed */
-        align-items: center;; /* Adjust as needed */
+    #container {
+      width: 100%;
+      height: 400px;
+      background-color: #333;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      border-radius: 7px;
+      touch-action: none;
     }
-
-    #one-axis-joystick-container-x {
-        width: 300px;
-        height: 50px;
-        border: 1px solid #000;
-        position: relative;
-        overflow: hidden;
+    #item {
+      width: 100px;
+      height: 100px;
+      background-color: rgb(245, 230, 99);
+      border: 10px solid rgba(136, 136, 136, .5);
+      border-radius: 50%;
+      touch-action: none;
+      user-select: none;
     }
-
-    #one-axis-joystick-handle-x {
-        width: 50px;
-        height: 50px;
-        background: #000;
-        position: absolute;
-        left: 0;
-        top: 50%; /* Center vertically */
-        transform: translateY(-50%); /* Center vertically */
-        cursor: pointer;
+    #item:active {
+      background-color: rgba(168, 218, 220, 1.00);
     }
-
-    #one-axis-joystick-container-y {
-        width: 50px;
-        height: 300px;
-        border: 1px solid #000;
-        position: relative;
-        overflow: hidden;
-    }
-
-    #one-axis-joystick-handle-y {
-        width: 50px;
-        height: 50px;
-        background: #000;
-        position: absolute;
-        top: 0;
-        left: 50%; /* Center horizontally */
-        transform: translateX(-50%); /* Center horizontally */
-        cursor: pointer;
+    #item:hover {
+      cursor: pointer;
+      border-width: 20px;
     }
 
     #log {
@@ -212,14 +195,13 @@
   
     <div id="doublejoystick" class="tabcontent">
         <h3>Double single axis one-axis-joystick controls</h3>
-        <div id="one-axis-joystick-wrapper">
-            <div id="one-axis-joystick-container-x">
-                <div id="one-axis-joystick-handle-x"></div>
+        <div id="outerContainer">
+            <div id="container">
+              <div id="item">
+        
+              </div>
             </div>
-            <div id="one-axis-joystick-container-y">
-                <div id="one-axis-joystick-handle-y"></div>
-            </div>
-        </div>
+          </div>
     </div>
 
     <div id="Sound">
@@ -268,85 +250,69 @@
 
     <!-- one-axis-joystick controlling scripts -->
     <script type="text/javascript">
-        var joystickContainer = document.getElementById('one-axis-joystick-container-x');
-        var joystickHandle = document.getElementById('one-axis-joystick-handle-x');
+        var dragItem = document.querySelector("#item");
+        var container = document.querySelector("#container");
 
-        joystickHandle.addEventListener('mousedown', startDrag);
-        joystickContainer.addEventListener('mouseup', stopDrag);
-        joystickContainer.addEventListener('mousemove', drag);
+        var active = false;
+        var currentX;
+        var currentY;
+        var initialX;
+        var initialY;
+        var xOffset = 0;
+        var yOffset = 0;
 
-        var dragStatus = false;
-        var startX, startLeft;
+        container.addEventListener("touchstart", dragStart, false);
+        container.addEventListener("touchend", dragEnd, false);
+        container.addEventListener("touchmove", drag, false);
 
-        function startDrag(e) {
-            dragStatus = true;
-            startX = e.clientX;
-            startLeft = joystickHandle.offsetLeft;
+        container.addEventListener("mousedown", dragStart, false);
+        container.addEventListener("mouseup", dragEnd, false);
+        container.addEventListener("mousemove", drag, false);
+
+        function dragStart(e) {
+        if (e.type === "touchstart") {
+            initialX = e.touches[0].clientX - xOffset;
+            initialY = e.touches[0].clientY - yOffset;
+        } else {
+            initialX = e.clientX - xOffset;
+            initialY = e.clientY - yOffset;
         }
 
-        function stopDrag() {
-            dragStatus = false;
-            // Calculate the center position
-            var centerPosition = (joystickContainer.offsetWidth - joystickHandle.offsetWidth) / 2;
-            // Reset the handle position to the center
-            joystickHandle.style.left = centerPosition + 'px';
+        if (e.target === dragItem) {
+            active = true;
+        }
+        }
+
+        function dragEnd(e) {
+        initialX = currentX;
+        initialY = currentY;
+
+        active = false;
         }
 
         function drag(e) {
-            if (dragStatus) {
-                var dx = e.clientX - startX;
-                var newLeft = startLeft + dx;
-            
-                // Keep one-axis-joystick handle within container
-                newLeft = Math.max(0, newLeft);
-                newLeft = Math.min(newLeft, joystickContainer.offsetWidth - joystickHandle.offsetWidth);
-            
-                joystickHandle.style.left = newLeft + 'px';
+        if (active) {
+        
+            e.preventDefault();
+        
+            if (e.type === "touchmove") {
+            currentX = e.touches[0].clientX - initialX;
+            currentY = e.touches[0].clientY - initialY;
+            } else {
+            currentX = e.clientX - initialX;
+            currentY = e.clientY - initialY;
             }
+
+            xOffset = currentX;
+            yOffset = currentY;
+
+            setTranslate(currentX, currentY, dragItem);
+        }
         }
 
-        // Initialize the one-axis-joystick handle to the center
-        stopDrag();
-
-        var joystickContainerY = document.getElementById('one-axis-joystick-container-y');
-        var joystickHandleY = document.getElementById('one-axis-joystick-handle-y');
-
-        joystickHandleY.addEventListener('mousedown', startDragY);
-        joystickContainerY.addEventListener('mouseup', stopDragY);
-        joystickContainerY.addEventListener('mousemove', dragY);
-
-        var dragStatusY = false;
-        var startY, startTop;
-
-        function startDragY(e) {
-            dragStatusY = true;
-            startY = e.clientY;
-            startTop = joystickHandleY.offsetTop;
+        function setTranslate(xPos, yPos, el) {
+        el.style.transform = "translate3d(" + xPos + "px, " + yPos + "px, 0)";
         }
-
-        function stopDragY() {
-            dragStatusY = false;
-            // Calculate the center position
-            var centerPositionY = (joystickContainerY.offsetHeight - joystickHandleY.offsetHeight) / 2;
-            // Reset the handle position to the center
-            joystickHandleY.style.top = centerPositionY + 'px';
-        }
-
-        function dragY(e) {
-            if (dragStatusY) {
-                var dy = e.clientY - startY;
-                var newTop = startTop + dy;
-
-                // Keep one-axis-joystick handle within container
-                newTop = Math.max(0, newTop);
-                newTop = Math.min(newTop, joystickContainerY.offsetHeight - joystickHandleY.offsetHeight);
-
-                joystickHandleY.style.top = newTop + 'px';
-            }
-        }
-
-        // Initialize the one-axis-joystick handle to the center
-        stopDragY();
     </script>
 
     <!-- Log scripts -->
