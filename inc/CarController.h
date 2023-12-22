@@ -20,7 +20,8 @@ public:
 
     void setSpeed(uint8_t speed_percentage);
 
-    void driveRelativeDirection(int16_t angle, uint8_t speed);
+    // angle from 90 to -90 and speed 100 to -100
+    void driveRelativeDirection(int8_t angle, int8_t speed);
 
     void stop();
 private:

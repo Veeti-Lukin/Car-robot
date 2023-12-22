@@ -104,10 +104,12 @@
     
     /* Style the tab content */
     .tabcontent {
-      display: none;
-      padding: 6px 12px;
-      border: 1px solid #ccc;
-      border-top: none;
+        width: 100%;
+        height: 100%;
+        display: none;
+        padding: 6px 12px;
+        border: 1px solid #ccc;
+        border-top: none;
     } 
 
     /* Fade in animation for tabs*/
@@ -121,35 +123,6 @@
       to {opacity: 1;}
     }
 
-    
-    #container {
-      width: 100%;
-      height: 400px;
-      background-color: #333;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-      border-radius: 7px;
-      touch-action: none;
-    }
-    #item {
-      width: 100px;
-      height: 100px;
-      background-color: rgb(245, 230, 99);
-      border: 10px solid rgba(136, 136, 136, .5);
-      border-radius: 50%;
-      touch-action: none;
-      user-select: none;
-    }
-    #item:active {
-      background-color: rgba(168, 218, 220, 1.00);
-    }
-    #item:hover {
-      cursor: pointer;
-      border-width: 20px;
-    }
-
     #log {
         font-family: monospace;
         background-color: #f0f0f0;
@@ -159,6 +132,58 @@
         overflow-y: auto;
         white-space: pre-wrap;
     }
+
+    /* Slider styles */
+
+    .slider-grid {
+        display: grid;
+        grid-template-columns: auto auto; /* Creates two columns */
+    }
+
+    .slidecontainer {
+        width: 50%; /* Width of the outside container */
+        transform: scale(scaleFactor);
+    }
+    /* The slider itself */
+    .slider {
+        -webkit-appearance: none;  /* Override default CSS styles */
+        appearance: none;
+        width: 100%; /* Full-width */
+        height: 25px; /* Specified height */
+        background: #d3d3d3; /* Grey background */
+        outline: none; /* Remove outline */
+        opacity: 0.7; /* Set transparency (for mouse-over effects on hover) */
+        -webkit-transition: .2s; /* 0.2 seconds transition on hover */
+        transition: opacity .2s;
+        transform-origin: top left;
+    }
+
+    #speed-slider {
+        transform: rotate(90deg);
+    }
+
+    /* Mouse-over effects */
+    .slider:hover {
+        opacity: 1; /* Fully shown on mouse-over */
+    }
+
+    /* The slider handle (use -webkit- (Chrome, Opera, Safari, Edge) and -moz- (Firefox) to override default look) */
+    .slider::-webkit-slider-thumb {
+        -webkit-appearance: none; /* Override default look */
+        appearance: none;
+        width: 25px; /* Set a specific slider handle width */
+        height: 25px; /* Slider handle height */
+        background: #04AA6D; /* Green background */
+        cursor: pointer; /* Cursor on hover */
+    }
+
+    .slider::-moz-range-thumb {
+        width: 25px; /* Set a specific slider handle width */
+        height: 25px; /* Slider handle height */
+        background: #04AA6D; /* Green background */
+        cursor: pointer; /* Cursor on hover */
+    }
+
 </style>
 
 <body>
@@ -173,8 +198,8 @@
     <!-- Tab links -->
     <div class="tab">
         <button class="tablinks" onclick="openTab(event, 'button')" id="defaultOpen">Basic Buttons</button>
-        <button class="tablinks" onclick="openTab(event, 'joystick')">one-axis-joystick</button>
-        <button class="tablinks" onclick="openTab(event, 'doublejoystick')">Double one-axis-joystick</button>
+        <button class="tablinks" onclick="openTab(event, 'joystick')">Joystick</button>
+        <button class="tablinks" onclick="openTab(event, 'sliders')">Sliders</button>
     </div>
 
     <!-- Tab content -->
@@ -193,15 +218,16 @@
         <h3>one-axis-joystick controls</h3>
     </div>
   
-    <div id="doublejoystick" class="tabcontent">
-        <h3>Double single axis one-axis-joystick controls</h3>
-        <div id="outerContainer">
-            <div id="container">
-              <div id="item">
-        
-              </div>
+    <div id="sliders" class="tabcontent">
+        <h3>Slider controls</h3>
+        <div class="slider-grid">
+            <div class="slidecontainer" id="speed-rotationcontainer">
+                <input type="range" min="-90" max="90" value="0" class="slider" id="rotation-slider">
             </div>
-          </div>
+            <div class="slidecontainer" id="speed-slidercontainer">
+                <input type="range" min="-100" max="100" value="0" class="slider" id="speed-slider">
+            </div>
+        </div>
     </div>
 
     <div id="Sound">
@@ -217,6 +243,7 @@
         <div id="log">
             <p id="logcontent">Log messages will appear here</p>
         </div>
+        <p id="demo"></p>
     </div>
     
     <!-- Tab controlling scripts -->
@@ -242,77 +269,40 @@
             // Show the current tab, and add an "active" class to the button that opened the tab
             document.getElementById(tab_id).style.display = "block";
             evt.currentTarget.className += " active";
+
+            if(tab_id == "sliders") {
+                var tabcontent_div = document.getElementById("sliders");
+                var speed_slider = document.getElementById("speed-slider");
+                tabcontent_div.style.height = speed_slider.clientWidth + 100 + "px";
+                console.log(speed_slider.clientWidth);
+            }
         }
         
         // open the default tab
         document.getElementById("defaultOpen").click();
     </script>
 
-    <!-- one-axis-joystick controlling scripts -->
+    <!--Slider control scripts -->
     <script type="text/javascript">
-        var dragItem = document.querySelector("#item");
-        var container = document.querySelector("#container");
-
-        var active = false;
-        var currentX;
-        var currentY;
-        var initialX;
-        var initialY;
-        var xOffset = 0;
-        var yOffset = 0;
-
-        container.addEventListener("touchstart", dragStart, false);
-        container.addEventListener("touchend", dragEnd, false);
-        container.addEventListener("touchmove", drag, false);
-
-        container.addEventListener("mousedown", dragStart, false);
-        container.addEventListener("mouseup", dragEnd, false);
-        container.addEventListener("mousemove", drag, false);
-
-        function dragStart(e) {
-        if (e.type === "touchstart") {
-            initialX = e.touches[0].clientX - xOffset;
-            initialY = e.touches[0].clientY - yOffset;
-        } else {
-            initialX = e.clientX - xOffset;
-            initialY = e.clientY - yOffset;
-        }
-
-        if (e.target === dragItem) {
-            active = true;
-        }
-        }
-
-        function dragEnd(e) {
-        initialX = currentX;
-        initialY = currentY;
-
-        active = false;
-        }
-
-        function drag(e) {
-        if (active) {
+        var scaleFactor = 0.5;
+        var speed_slider = document.getElementById("speed-slider");
+        var rotation_slider = document.getElementById("rotation-slider");
         
-            e.preventDefault();
-        
-            if (e.type === "touchmove") {
-            currentX = e.touches[0].clientX - initialX;
-            currentY = e.touches[0].clientY - initialY;
-            } else {
-            currentX = e.clientX - initialX;
-            currentY = e.clientY - initialY;
-            }
+        // initialize slider values
+        speed_slider.value = 0;
+        rotation_slider.value = 0;
 
-            xOffset = currentX;
-            yOffset = currentY;
 
-            setTranslate(currentX, currentY, dragItem);
+        // Update the current slider value (each time you drag the slider handle)
+        speed_slider.oninput = function() {
+            sendMovementCommand(MovementCommandActions.DRIVE_RELATIVE_ANGLE, parseInt(rotation_slider.value), parseInt(this.value));;
         }
+        rotation_slider.oninput = function() {
+            sendMovementCommand(MovementCommandActions.DRIVE_RELATIVE_ANGLE, parseInt(this.value), parseInt(speed_slider.value));
         }
 
-        function setTranslate(xPos, yPos, el) {
-        el.style.transform = "translate3d(" + xPos + "px, " + yPos + "px, 0)";
-        }
+        // TODO: add a function that restores sliders to their default values if bool is checked
+
     </script>
 
     <!-- Log scripts -->
@@ -359,6 +349,7 @@
     <script type="text/javascript">
         const ROOT_COMMANDING_ROUTE = 'robot-api/';
         const MOVEMENT_COMMANDING_ROUTE = ROOT_COMMANDING_ROUTE + 'movement-command';
+        var command_on_hold = false;
         
         const MovementCommandActions = {
             DRIVE_FORWARD: 0,
@@ -389,6 +380,8 @@
                 body: command_body,
             })
             .then(response => {
+                command_on_hold = false;
+
                 response_status = response.status;
                 response_text = response.status + ' ' + response.statusText;
                 return response.json();
@@ -414,6 +407,12 @@
 
         // Function to send a command to the robot
         function sendMovementCommand(command_action, ...command_args) {
+            if (command_on_hold) {
+                console.log('Command on hold');
+                return;
+            }
+            command_on_hold = true;
+
             switch (command_action) {
                 case MovementCommandActions.DRIVE_FORWARD:
                     if (command_args.length != 0) {

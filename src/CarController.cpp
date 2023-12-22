@@ -1,8 +1,9 @@
 #include "../inc/CarController.h"
 
-#include "math.h"
-#include "BCM2711_GPIO_DRIVER/inc/BCM2711_GPIO_Driver/gpio_types.h"
+#include <cmath>
 #include <iostream>
+
+#include "BCM2711_GPIO_DRIVER/inc/BCM2711_GPIO_Driver/gpio_types.h"
 
 
 CarController::CarController(PwmPin left_motor_speed_pin, uint8_t left_motor_dir1_pin,
@@ -43,69 +44,49 @@ void CarController::turnLeft()
 
 void CarController::turnRight()
 {
-    {
-
-        right_motor.setDirection(backwards);
-        left_motor.setDirection(forward);
-        right_motor.setSpeed(speed_);
-        left_motor.setSpeed(speed_);
-    }
-
+    right_motor.setDirection(backwards);
+    left_motor.setDirection(forward);
+    right_motor.setSpeed(speed_);
+    left_motor.setSpeed(speed_);
 }
 
-void CarController::driveRelativeDirection(int16_t angle, uint8_t speed)
+void CarController::driveRelativeDirection(int8_t angle, int8_t speed)
 {
-    float angle_factor = static_cast<float>(90 - abs(angle)) / 90.0;
-    uint8_t inner_motor_speed = static_cast<int>(angle_factor * speed);
+    MotorSpinDirection direction;
 
-    //todo: refactor
-    if (angle < 90 && angle > -90) {
-        right_motor.setDirection(forward);
-        left_motor.setDirection(forward);
-        if (angle > 0) { // turning right
-            right_motor.setDirection(forward);
-            left_motor.setDirection(forward);
-            left_motor.setSpeed(speed);
-            right_motor.setSpeed(inner_motor_speed);
-        }
-
-        else if (angle < 0) { // turning left
-            right_motor.setDirection(forward);
-            left_motor.setDirection(forward);
-            right_motor.setSpeed(speed);
-            left_motor.setSpeed(inner_motor_speed);
-        }
-
-        else { // angle = 0 hence driving straight forward
-            right_motor.setDirection(forward);
-            left_motor.setDirection(forward);
-            right_motor.setSpeed(speed);
-            left_motor.setSpeed(speed);
-        }
+    if (speed >= 0 ) {     // driving forward
+        direction = MotorSpinDirection::forward;
     }
-    else { // driving backwards
-        if (angle > 0) { // turning right
-            right_motor.setDirection(backwards);
-            left_motor.setDirection(backwards);
-            left_motor.setSpeed(speed);
-            right_motor.setSpeed(inner_motor_speed);
-        }
-
-        else if (angle < 0) { // turning left
-            right_motor.setDirection(backwards);
-            left_motor.setDirection(backwards);
-            right_motor.setSpeed(speed);
-            left_motor.setSpeed(inner_motor_speed);
-        }
-
-        else { // angle = 180 hence driving straight backwards
-            right_motor.setDirection(backwards);
-            left_motor.setDirection(backwards);
-            right_motor.setSpeed(speed);
-            left_motor.setSpeed(speed);
-        }
-
+    else {                // driving backwards
+        direction = MotorSpinDirection::backwards;
     }
+
+    speed_  = abs(speed);
+
+    double angle_factor = static_cast<float>(90 - abs(angle)) / 90.0;
+    uint8_t inner_motor_speed = static_cast<int>(angle_factor * speed_);
+
+    left_motor.setDirection(direction);
+    right_motor.setDirection(direction);
+
+    // driving straight
+    if (angle == 0) {
+        left_motor.setSpeed(speed_);
+        right_motor.setSpeed(speed_);
+    }
+    // turning to right
+    else if(angle > 0) {
+        left_motor.setSpeed(speed_);
+        right_motor.setSpeed(inner_motor_speed);
+    }
+    // turing to left
+    else {
+        left_motor.setSpeed(inner_motor_speed);
+        right_motor.setSpeed(speed_);
+    }
+
+    std::cout << static_cast<int>(inner_motor_speed) << " - " <<
+    static_cast<int>(speed_) << std::endl;
 }
 
 void CarController::setSpeed(uint8_t speed_percentage)

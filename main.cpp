@@ -44,8 +44,16 @@ bool executeMovementCommand(const Command& command, CarController& car_controlle
         case MoveCommandAction::TURN_RIGHT:
             car_controller.turnRight();
             return true;
-        case MoveCommandAction::DRIVE_RELATIVE_ANGLE:
-            break;
+        case MoveCommandAction::DRIVE_RELATIVE_ANGLE:{
+            int8_t angle = 0;
+            int8_t speed = 0;
+            if(!getJsonFieldAsType<int8_t>("angle", command.command_args, angle))
+                return false;
+            if(!getJsonFieldAsType<int8_t >("speed", command.command_args, speed))
+                return false;
+            car_controller.driveRelativeDirection(angle, speed);
+            return true;
+        }
         case MoveCommandAction::STOP_MOTORS:
             car_controller.stop();
             return true;
