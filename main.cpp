@@ -30,7 +30,7 @@ http::HttpResponse createExecutedCommandResponse(const std::string& log_message)
 
 
 
-bool executeMovementCommand(const Command& command, CarController car_controller) {
+bool executeMovementCommand(const Command& command, CarController& car_controller) {
     switch ((MoveCommandAction)command.command_action) {
         case MoveCommandAction::DRIVE_FORWARD:
             car_controller.driveForward();
