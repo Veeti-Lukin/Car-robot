@@ -243,7 +243,6 @@
         <div id="log">
             <p id="logcontent">Log messages will appear here</p>
         </div>
-        <p id="demo"></p>
     </div>
     
     <!-- Tab controlling scripts -->
@@ -274,7 +273,6 @@
                 var tabcontent_div = document.getElementById("sliders");
                 var speed_slider = document.getElementById("speed-slider");
                 tabcontent_div.style.height = speed_slider.clientWidth + 100 + "px";
-                console.log(speed_slider.clientWidth);
             }
         }
         
@@ -292,10 +290,10 @@
         speed_slider.value = 0;
         rotation_slider.value = 0;
 
-
-        // Update the current slider value (each time you drag the slider handle)
         speed_slider.oninput = function() {
-            sendMovementCommand(MovementCommandActions.DRIVE_RELATIVE_ANGLE, parseInt(rotation_slider.value), parseInt(this.value));;
+            // since the slider is rotated, the value is inverted
+            value = -parseInt(this.value);
+            sendMovementCommand(MovementCommandActions.DRIVE_RELATIVE_ANGLE, parseInt(rotation_slider.value), parseInt(value));
         }
         rotation_slider.oninput = function() {
             sendMovementCommand(MovementCommandActions.DRIVE_RELATIVE_ANGLE, parseInt(this.value), parseInt(speed_slider.value));
