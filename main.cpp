@@ -70,7 +70,7 @@ int main() {
     using http::TcpServer;
 
     BCM2711_GPIO_DRIVER::initialize();
-    CarController car_controller(K_PWM_PIN12, 7, 1, K_PWM_PIN18, 15, 14);
+    CarController car_controller(K_PWM_PIN12, 7, 1, K_PWM_PIN13, 6, 5);
 
 
     TcpServer server("0.0.0.0", 2234);
