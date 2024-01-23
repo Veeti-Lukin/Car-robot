@@ -358,12 +358,13 @@
 
     <!-- Log scripts -->
     <script>
-        const log = document.getElementById('logcontent');
+        var log_contents = document.getElementById('logcontent');
+        var log = document.getElementById('log');
         var first_log_event = true;
         var show_frontend_logs = false;
 
         function clearLog() {
-            log.textContent = '';
+            log_contents.textContent = '';
         }
 
         function addLogMessage(message) {
@@ -378,7 +379,7 @@
             const seconds = String(now.getSeconds()).padStart(2, '0');
             const timestamp = `${hours}:${minutes}:${seconds}`;
 
-            log.textContent += `[${timestamp}] ${message}\n`;
+            log_contents.textContent += `[${timestamp}] ${message}\n`;
 
             // Scroll to the end
             log.scrollTop = log.scrollHeight;
