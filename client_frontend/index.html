@@ -225,6 +225,8 @@
   
     <div id="sliders" class="tabcontent">
         <h3>Slider controls</h3>
+        <input type="checkbox" id="reset-sliders-on-release">Reset sliders when released</input>
+        <br><br>
         <div class="slider-grid">
             <div class="slidecontainer" id="rotation-slidercontainer">
                 <input type="range" min="-90" max="90" value="0" class="slider" id="rotation-slider">
@@ -294,6 +296,7 @@
         var rotation_slider = document.getElementById("rotation-slider");
         var speed_slider_label = document.getElementById('speed_slider_label');
         var rotation_slider_label = document.getElementById('rotation_slider_label');
+        var reset_sliders_on_release = document.getElementById('reset-sliders-on-release');
         
         // initialize slider values
         speed_slider.value = 0;
@@ -312,8 +315,19 @@
             //rotation_slider_label.style.left = (this.value / this.max * 100) + '%';
         }
 
-        // TODO: add a function that restores sliders to their default values if bool is checked
+        // these should be called when the user releases the slider
+        speed_slider.onchange = function() {
+            if(!reset_sliders_on_release.checked) return; 
+            speed_slider.value = 0;
+            speed_slider_label.innerHTML = 0;
+        }
 
+        rotation_slider.onchange = function() {
+            if(!reset_sliders_on_release.checked) return; 
+            rotation_slider.value = 0;
+            rotation_slider_label.innerHTML = 0;
+        }
+        
     </script>
 
     <!-- Log scripts -->
