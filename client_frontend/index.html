@@ -297,21 +297,47 @@
         var speed_slider_label = document.getElementById('speed_slider_label');
         var rotation_slider_label = document.getElementById('rotation_slider_label');
         var reset_sliders_on_release = document.getElementById('reset-sliders-on-release');
-        
+
+        // the slider has a dead zone in the middle, this is the size of that dead zone
+        // this is the width from the center of of the slider to first value that is not 0
+        const slider_middle_deadzone_width = 10;
+        // this function scales the slider value so that the dead zone is removed
+        function getSliderValueWithDeadzoneScaling(slider_value) {
+            if(Math.abs(slider_value) < slider_middle_deadzone_width) {
+                return 0;
+            }
+
+            return slider_value - (Math.sign(slider_value) * slider_middle_deadzone_width);
+        }
+
+        function addDeadZoneToSliders() {
+            speed_slider.setAttribute("min", parseInt(speed_slider.getAttribute("min")) - slider_middle_deadzone_width);
+            speed_slider.setAttribute("max", parseInt(speed_slider.getAttribute("max")) + slider_middle_deadzone_width);
+            rotation_slider.setAttribute("min", parseInt(rotation_slider.getAttribute("min")) - slider_middle_deadzone_width);
+            rotation_slider.setAttribute("max", parseInt(rotation_slider.getAttribute("max")) + slider_middle_deadzone_width);
+        }
+        addDeadZoneToSliders();
+
         // initialize slider values
         speed_slider.value = 0;
         rotation_slider.value = 0;
 
         speed_slider.oninput = function() {
             // since the slider is rotated, the value is inverted
-            value = -parseInt(this.value);
-            sendMovementCommand(MovementCommandActions.DRIVE_RELATIVE_ANGLE, parseInt(rotation_slider.value), parseInt(value));
-            speed_slider_label.innerHTML = this.value;
+            speed_slider_value = getSliderValueWithDeadzoneScaling(-parseInt(this.value));
+            rotation_slider_value = getSliderValueWithDeadzoneScaling(parseInt(rotation_slider.value));
+
+            sendMovementCommand(MovementCommandActions.DRIVE_RELATIVE_ANGLE, rotation_slider_value, speed_slider_value);
+            speed_slider_label.innerHTML = speed_slider_value;
             //speed_slider_label.style.left = (this.value / this.max * 100) + '%';
         }
         rotation_slider.oninput = function() {
-            sendMovementCommand(MovementCommandActions.DRIVE_RELATIVE_ANGLE, parseInt(this.value), parseInt(speed_slider.value));
-            rotation_slider_label.innerHTML = this.value;
+            // since the slider is rotated, the value is inverted
+            speed_slider_value = getSliderValueWithDeadzoneScaling(-parseInt(speed_slider.value));
+            rotation_slider_value = getSliderValueWithDeadzoneScaling(parseInt(this.value));
+
+            sendMovementCommand(MovementCommandActions.DRIVE_RELATIVE_ANGLE, rotation_slider_value, speed_slider_value);
+            rotation_slider_label.innerHTML = rotation_slider_value;
             //rotation_slider_label.style.left = (this.value / this.max * 100) + '%';
         }
 
