@@ -23,15 +23,15 @@
     }
     .columnLateral
     {
-      float: left;
-      width: 15%;
-      min-width: 300px;
+        float: left;
+        width: 15%;
+        min-width: 300px;
     }
     .columnCetral
     {
-      float: left;
-      width: 70%;
-      min-width: 300px;
+        float: left;
+        width: 70%;
+        min-width: 300px;
     } 
 
     #STOP-Critical {
@@ -75,30 +75,30 @@
 
      /* Style the tab */
     .tab {
-      overflow: hidden;
-      border: 1px solid #ccc;
-      background-color: #f1f1f1;
+        overflow: hidden;
+        border: 1px solid #ccc;
+        background-color: #f1f1f1;
     }
 
     /* Style the buttons that are used to open the tab content */
     .tab button {
-      background-color: inherit;
-      float: left;
-      border: none;
-      outline: none;
-      cursor: pointer;
-      padding: 14px 16px;
-      transition: 0.3s;
+        background-color: inherit;
+        float: left;
+        border: none;
+        outline: none;
+        cursor: pointer;
+        padding: 14px 16px;
+        transition: 0.3s;
     }
 
     /* Change background color of buttons on hover */
     .tab button:hover {
-      background-color: #ddd;
+        background-color: #ddd;
     }
 
     /* Create an active/current tablink class */
     .tab button.active {
-      background-color: #ccc;
+        background-color: #ccc;
     }
     
     
@@ -184,6 +184,11 @@
         cursor: pointer; /* Cursor on hover */
     }
 
+    .slider-label {
+        position: absolute;
+        transform: translateX(-50%);
+    }
+
 </style>
 
 <body>
@@ -221,11 +226,13 @@
     <div id="sliders" class="tabcontent">
         <h3>Slider controls</h3>
         <div class="slider-grid">
-            <div class="slidecontainer" id="speed-rotationcontainer">
+            <div class="slidecontainer" id="rotation-slidercontainer">
                 <input type="range" min="-90" max="90" value="0" class="slider" id="rotation-slider">
+                <span class="slider-label" id="rotation_slider_label">0</span>
             </div>
             <div class="slidecontainer" id="speed-slidercontainer">
                 <input type="range" min="-100" max="100" value="0" class="slider" id="speed-slider">
+                <span class="slider-label" id="speed_slider_label">0</span>
             </div>
         </div>
     </div>
@@ -285,6 +292,8 @@
         var scaleFactor = 0.5;
         var speed_slider = document.getElementById("speed-slider");
         var rotation_slider = document.getElementById("rotation-slider");
+        var speed_slider_label = document.getElementById('speed_slider_label');
+        var rotation_slider_label = document.getElementById('rotation_slider_label');
         
         // initialize slider values
         speed_slider.value = 0;
@@ -294,9 +303,13 @@
             // since the slider is rotated, the value is inverted
             value = -parseInt(this.value);
             sendMovementCommand(MovementCommandActions.DRIVE_RELATIVE_ANGLE, parseInt(rotation_slider.value), parseInt(value));
+            speed_slider_label.innerHTML = this.value;
+            //speed_slider_label.style.left = (this.value / this.max * 100) + '%';
         }
         rotation_slider.oninput = function() {
             sendMovementCommand(MovementCommandActions.DRIVE_RELATIVE_ANGLE, parseInt(this.value), parseInt(speed_slider.value));
+            rotation_slider_label.innerHTML = this.value;
+            //rotation_slider_label.style.left = (this.value / this.max * 100) + '%';
         }
 
         // TODO: add a function that restores sliders to their default values if bool is checked
