@@ -14,6 +14,9 @@ SoftwarePwmController::~SoftwarePwmController() {
 }
 
 void SoftwarePwmController::enable(bool enable) {
+    // nothing should be done if <enable> status is the same than already set
+    // would lead to memory leak or nullpointer accessing when thread is deleted
+    if(enable == enabled_) return;
     enabled_ = enable;
 
     if(enabled_) {
