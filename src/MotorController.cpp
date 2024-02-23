@@ -21,14 +21,16 @@ void L289N_MotorController::setSpeed(uint8_t speed_percentage)
             effective_ducty_cycle_start + (100 - effective_ducty_cycle_start) *
             (speed_percentage / 100.0) : 0;
 
-    if (is_stopped_) {
+    speed_ = duty_cycle_percentage;
+
+    if (false) {
         // get rid of static friction
-        BCM2711_GPIO_DRIVER::configPwmPin(K_PWM_FREQUENCY, 100, speed_pin_);
+        BCM2711_GPIO_DRIVER::configPwmPin(pwm_freq_, 100, speed_pin_);
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
         is_stopped_ = false;
     }
 
-    BCM2711_GPIO_DRIVER::configPwmPin(K_PWM_FREQUENCY, duty_cycle_percentage, speed_pin_);
+    BCM2711_GPIO_DRIVER::configPwmPin(pwm_freq_, duty_cycle_percentage, speed_pin_);
 
     if(speed_percentage == 0) is_stopped_ = true;
 }
@@ -63,3 +65,8 @@ void L289N_MotorController::forceStop()
     BCM2711_GPIO_DRIVER::setOuputPin(dir2_pin, HIGH);
 }
 
+void L289N_MotorController::setFreq(uint16_t freq) {
+    pwm_freq_ = freq;
+    BCM2711_GPIO_DRIVER::configPwmPin(freq, speed_, speed_pin_);
+
+}

@@ -16,6 +16,7 @@ enum class MoveCommandAction : int {
     STOP_MOTORS = 5,
     START_MOTORS = 6,
     SET_SPEED = 7,
+    CHANGE_TONE,
 
     UNKNOWN = INT_MAX
 };

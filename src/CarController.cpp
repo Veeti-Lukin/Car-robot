@@ -99,3 +99,9 @@ void CarController::stop()
     left_motor.forceStop();
     right_motor.forceStop();
 }
+
+void CarController::setTone(uint16_t tone) {
+    tone_ = tone;
+    left_motor.setFreq(tone);
+    right_motor.setFreq(tone);
+}

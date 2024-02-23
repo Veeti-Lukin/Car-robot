@@ -66,6 +66,12 @@ bool executeMovementCommand(const Command& command, CarController& car_controlle
             car_controller.setSpeed(speed);
             return true;
         }
+        case MoveCommandAction::CHANGE_TONE:{
+            uint16_t tone = 0;
+            if(!getJsonFieldAsType<uint16_t>("tone", command.command_args, tone))
+                return false;
+            car_controller.setTone(tone);
+        }
         case MoveCommandAction::UNKNOWN:
         default:
             break;
