@@ -217,6 +217,8 @@
         <button id="stop", onclick="sendMovementCommand(MovementCommandActions.STOP)">Stop</button>
         <input type="number" id="speed-box" step="10">
         <button id="set-speed", onclick="sendMovementCommand(MovementCommandActions.SET_SPEED, parseInt(document.getElementById('speed-box').value) )">Set speed</button>
+        <input type="number" id="tone-box" step="10">
+        <button id="set-speed", onclick="sendMovementCommand(MovementCommandActions.CHANGE_TONE, parseInt(document.getElementById('tone-box').value) )">Set tone</button>
      </div>
   
     <div id="joystick" class="tabcontent">
@@ -412,6 +414,7 @@
             STOP: 5,
             START: 6,
             SET_SPEED: 7,
+            CHANGE_TONE: 8,
         };
         
         // Function to send a POST request to the server
@@ -524,6 +527,9 @@
                         return;
                     }
                     sendPostRequest(MovementCommandActions.SET_SPEED, { speed: command_args[0] });
+                    break;
+                case MovementCommandActions.CHANGE_TONE:
+                    sendPostRequest(MovementCommandActions.CHANGE_TONE, {tone: command_args[0]});
                     break;
                 default:
                     console.error('Invalid command: ' + command);
