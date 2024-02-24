@@ -14,15 +14,19 @@ SoftwarePwmController::~SoftwarePwmController() {
 }
 
 void SoftwarePwmController::enable(bool enable) {
+    // handles the race condition of using attributes that are used in worker thread
+    std::lock_guard<std::mutex> lock_guard(mutex_);
+
     // nothing should be done if <enable> status is the same than already set
     // would lead to memory leak or nullpointer accessing when thread is deleted
     if(enable == enabled_) return;
+
     enabled_ = enable;
 
-    if(enabled_) {
+    if(enable) {
         worker_thread_ = new std::thread(worker_func);
     } else {
-        if(worker_thread_) worker_thread_->join();
+        if(worker_thread_ && worker_thread_->joinable()) worker_thread_->join();
         delete worker_thread_;
         worker_thread_ = nullptr;
         BCM2711_GPIO_DRIVER::setOuputPin(pin_num_, LOW);
@@ -30,6 +34,9 @@ void SoftwarePwmController::enable(bool enable) {
 }
 
 void SoftwarePwmController::configure(uint32_t frequency, uint8_t duty_cycle) {
+    // handles the race condition of using attributes that are used in worker thread
+    std::lock_guard<std::mutex> lock_guard(mutex_);
+
     if (duty_cycle > 100) duty_cycle = 100;
 
     on_time_ = std::chrono::milliseconds((1000-(1000/(frequency*1000))) * duty_cycle);

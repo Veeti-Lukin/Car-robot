@@ -16,7 +16,11 @@ PiezoController::~PiezoController() {
 bool PiezoController::playSound(PiezoController::Sound sound,
                                 PiezoController::PlayingProtocol playing_protocol) {
     // sound should not be played if there is already a sound playing
-    if(is_playing_) return false;
+    {
+        std::lock_guard<std::mutex> lock_guard(mutex_);
+        if(is_playing_) return false;
+    }
+
 
     work_thread = std::thread([&]{
         uint8_t volume_percentage;
@@ -27,7 +31,7 @@ bool PiezoController::playSound(PiezoController::Sound sound,
         }
 
         // greatest resonance(aka most volume) is achieved at 50% duty cycle
-        // going under or lower than that achieves just lowers the volume
+        // going under or over than that just lowers the volume
         uint8_t duty_cycle = volume_percentage/2;
 
         soft_pwm_controller_.configure(sound.frequency, duty_cycle);
@@ -44,6 +48,7 @@ bool PiezoController::playSound(PiezoController::Sound sound,
             std::this_thread::sleep_for(thread_sync_interval_);
             {
                 std::lock_guard<std::mutex> lock_guard(mutex_);
+                // playing sound has been disabled with <stopPlaying>
                 if(!is_playing_) break;
 
                 if(volume_percentage_ != volume_percentage) {
@@ -63,14 +68,13 @@ bool PiezoController::playSound(PiezoController::Sound sound,
     return true;
 }
 
-void PiezoController::stopPlaying() {
-    is_playing_ = false;
-}
-
 bool PiezoController::playSoundPattern(std::vector<Sound> sounds,
                                        PiezoController::PlayingProtocol playing_protocol) {
     // sound should not be played if there is already a sound playing
-    if(is_playing_) return false;
+    {
+        std::lock_guard<std::mutex> lock_guard(mutex_);
+        if(is_playing_) return false;
+    }
 
     work_thread = std::thread([&]{
         uint8_t volume_percentage;
@@ -127,6 +131,11 @@ bool PiezoController::playSoundPattern(std::vector<Sound> sounds,
 
     return true;
 }
+
+void PiezoController::stopPlaying() {
+    is_playing_ = false;
+}
+
 
 void PiezoController::setVolume(uint8_t volume_percentage) {
     if(volume_percentage > 100) volume_percentage = 100;

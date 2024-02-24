@@ -24,19 +24,27 @@ public:
 private:
     uint8_t pin_num_;
     bool enabled_ = false;
-    std::thread* worker_thread_ = nullptr;
+
+
     std::chrono::milliseconds on_time_;
     std::chrono::milliseconds off_time_;
 
+    std::thread* worker_thread_ = nullptr;
     std::mutex mutex_;
 
 
     std::function<void()> worker_func = [this](){
-        while(enabled_) {
+        while(true) {
             std::chrono::milliseconds on_time;
             std::chrono::milliseconds off_time;
+
+            // handle the race conditions
             {
                 std::lock_guard<std::mutex> lock_guard(mutex_);
+
+                // stop the pwm loop if controller has been disabled
+                if (!enabled_) return ;
+
                 on_time = on_time_;
                 off_time = off_time_;
             }
